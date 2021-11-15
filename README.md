@@ -40,6 +40,24 @@ Run the program (assuming cwd is ./inv-manager):
 You will be greeted with a menu:
 
 ~~~
+ ___                 __  __                                   
+|_ _|_ ____   __    |  \/  | __ _ _ __   __ _  __ _  ___ _ __ 
+ | || '_ \ \ / /____| |\/| |/ _` | '_ \ / _` |/ _` |/ _ \ '__|
+ | || | | \ V /_____| |  | | (_| | | | | (_| | (_| |  __/ |   
+|___|_| |_|\_/      |_|  |_|\__,_|_| |_|\__,_|\__, |\___|_|   
+                                              |___/           
+
+QB path: './data/qb_feed.csv'
+Logged in as youraddress@example.com to smtp.example.com on port 465...
+
+Ver. 1.1
+Pandas version: 1.3.4
+Numpy version: 1.21.4
+
+Create and send updated inventory feed csv files to dropship portals.
+
+	The new feeds are saved in `data/generated-feeds`.
+	The templates are stored in `data/inventory-templates`.
 
 #---------------------------------------------------------------------
 # Menu

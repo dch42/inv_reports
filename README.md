@@ -129,6 +129,37 @@ Selecting `s` will prompt you with a list of sites to send inventory emails to.
 
 All options will show a preview of the attachment and email generated, prompting for confirmation before sending or uploading.
 
+~~~
+########################################################################
+# Email #1/1 (ZOLA)
+# ---------------------------------------------------------------------
+
+ATTACHMENT:
+site-feed-2021-11-14-[23-09-15].csv 
+(data/generated-feeds/site/newest/site-feed-2021-11-14-[23-09-15].csv)
+SEND TO:
+Site (receiver_address@email.com)
+SUBJECT:
+2021-11-14 Company Inventory Feed for Site
+BODY:
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+
+Hi Name,
+
+Attached is an updated inventory feed of our products.
+
+Best Regards,
+Company
+
+#---------------------------------------------------------------------
+# End of email
+###################################################################### 
+
+Do you want to send this email? (y/N): 
+~~~
+
 ### Attachments 📎
 
 Attachments are taken from the ```data/generated-feeds/%brand/newest``` directory, and moved to ```data/generated-feeds/%brand/sent``` after being sent or uploaded as an attachment.

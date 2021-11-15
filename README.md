@@ -131,16 +131,16 @@ Directory hierarchy will look like this:
 generated-feeds/
 ├── site
 │   ├── newest
-│   └── old
-|└── sent
+│   ├── old
+│   └── sent
 ├── site1
 │   ├── newest
-│   └── old
-└── sent
+│   ├── old
+│   └── sent
 ├── site2
 │   ├── newest
-│   └── old
-|└── sent
+│   ├── old
+│   └── sent
 ~~~
 
 ### Backorder & Discontinued Item Handling

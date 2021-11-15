@@ -116,14 +116,32 @@ Generating feeds for:
 
 ### Output 📂
 
+Negative inventory levels are changed to `0`.
+
 The generated feeds are saved in the `data/generated-feeds` folder.
 
-File sorting works like this:
+If directories don't exist, the program will create them.
 
 - The most recently generated file resides in `data/generated-feeds/%brand/newest` (`mail_send` searches for this file)
 - When a new feed is generated, any unsent files are moved to `data/generated-feeds/%brand/old`
+- When a file is sent or uploaded as an attachment, it is moved to `data/generated-feeds/%brand/sent`
 
-Negative inventory levels are changed to `0`.
+Directory hierarchy will look like this:
+~~~
+generated-feeds/
+├── site
+│   ├── newest
+│   └── old
+|	└── sent
+├── site1
+│   ├── newest
+│   └── old
+	└── sent
+├── site2
+│   ├── newest
+│   └── old
+|	└── sent
+~~~
 
 ### Backorder & Discontinued Item Handling
 

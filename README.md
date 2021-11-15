@@ -16,6 +16,8 @@ Running `make` will install dependencies and add executable permissions to relev
 make
 ~~~
 
+Running `make` will also open this README.md with less, followed by opening `config.yml` in nano (free to exit and populate in an editor of your choice). 
+
 ### Config
 
 Fill out the configuration file at `config/config.yml`.
@@ -222,6 +224,8 @@ Do you want to send this email? (y/N):
 ~~~
 
 ### Attachments 📎
+
+Only .csv files are accepted as attachments, ignoring any pesky .hidden_files.
 
 Attachments are taken from the ```data/generated-feeds/%brand/newest``` directory, and moved to ```data/generated-feeds/%brand/sent``` after being sent or uploaded as an attachment.
 

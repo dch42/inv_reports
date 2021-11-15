@@ -1,0 +1,86 @@
+#                   __ _       _      _   
+#   ___ ___  _ __  / _(_) __ _| | ___| |_ 
+#  / __/ _ \| '_ \| |_| |/ _` | |/ _ \ __|
+# | (_| (_) | | | |  _| | (_| | |  __/ |_ 
+#  \___\___/|_| |_|_| |_|\__, |_|\___|\__|
+#                        |___/            
+#---------------------------------------------------------------------
+# mail_send info:
+#---------------------------------------------------------------------
+
+# place your email info here 
+sender_info:
+  SENDER_EMAIL: ""
+  EMAIL_PASSWORD: ""
+  SMTP_SERVER: ""
+  SERVER_PORT: 
+
+# if applicable place information for ftp server here
+ftp_info:
+  FTP_HOST: ""
+  FTP_USER: ""
+  FTP_PASSWORD: ""
+  FTP_UPLOAD_PATH: ""
+
+# place your company name here
+company_name: ""
+
+# info about email recipients
+# format = "sitename-single-word": ["receiver_email_address", "Site Name", "Name of Email Recipient"]
+receiver_info:
+    "sitename-single-word": ["receiver_email_address", "Site Name", "Name of Email Recipient"]
+    "sitename-single-word": ["receiver_email_address", "Site Name", "Name of Email Recipient"]
+    "sitename-single-word": ["receiver_email_address", "Site Name", "Name of Email Recipient"]
+
+
+# email body info
+body_greeting: "Hi"
+body_text: "Attached is an updated inventory feed of our products."
+body_closer: "Best Regards,"
+
+#---------------------------------------------------------------------
+# inv_feed info:
+#---------------------------------------------------------------------
+
+#place path to QuickBooks inventory export csv here
+path_to_qb: ""
+
+# list of brands for portals that require seperate brand feeds
+brand_list: ["","",""]
+
+# place sites that require backorder dates here
+backorder_site_list: 
+  - "site"
+  - "site"
+  - "site"
+
+# place backorder column titles from applicable inventory templates here
+backorder_cols: 
+  - "Stock Next Expected"
+  - "Next In-Stock Date"
+  - "Restock Date"
+  - "Next Available Date"
+  - "Item Next Availability Date"
+  - "Back order ETA"
+# place discontinued column titles from applicable inventory templates here
+discontinued_cols:
+  - "Discontinued?"
+  - "Discontinue Date"
+  - "Item Discontinued "
+
+# number of months from date of creation to set as backorder date
+months: 3
+
+# place sites that need column swapping and column index to swap here
+rearrange_dic:
+  "site": [0,1]
+
+# populate with info for your sites (column data copied from templates)
+# format = "sitename-single-word": ["SKU Column Title", "Quantity Column Title", "extra-params (if applicable)"]
+# extra-params are:
+#     multi_brand=True/False
+site_dic:
+    "site": ["Item Number", "Qty On Hand"]
+    "site": ["SKU", "QTY Available"]
+    "site": ["SKU", "Current Inventory Level", "multi_brand=True"]
+

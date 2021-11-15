@@ -31,7 +31,7 @@ Templates must be named to match the associated site (e.g. the template for 'dro
 SKUs in template files can be changed/updated, and the generated files will update accordingly so long as SKUs are present in the QuickBooks csv. 
 
 ## Usage
-Run the program (assuming cwd is project ./inv-manager):
+Run the program (assuming cwd is ./inv-manager):
 
 ~~~
 ./inv_feeds.py

@@ -131,7 +131,7 @@ All options will show a preview of the attachment and email generated, prompting
 
 ~~~
 ########################################################################
-# Email #1/1 (ZOLA)
+# Email #1/1 (SITE)
 # ---------------------------------------------------------------------
 
 ATTACHMENT:

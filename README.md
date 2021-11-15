@@ -121,6 +121,10 @@ Selecting `s` at the main menu will summon:
 (q)uit/back
 ~~~
 
+Selecting `a` will send to all valid sites present in `config.yml`.
+Selecting `f` will attempt to connect to an ftp server and upload the relevant file to specified upload directory.
+Delecting `s` will prompt you with a list of sites to send to.
+
 ### Attachments 📎
 
 Attachments are taken from the ```data/generated-feeds/%brand/newest``` directory, and moved to ```data/generated-feeds/%brand/sent``` after being sent or uploaded as an attachment.

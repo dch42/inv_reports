@@ -121,11 +121,13 @@ Selecting `s` at the main menu will summon:
 (q)uit/back
 ~~~
 
-Selecting `a` will send to all valid sites present in `config.yml`.
+Selecting `a` will send inventory emails to all valid sites present in `config.yml`.
 
 Selecting `f` will attempt to connect to an ftp server and upload the relevant file to specified upload directory.
 
-Delecting `s` will prompt you with a list of sites to send to.
+Selecting `s` will prompt you with a list of sites to send inventory emails to.
+
+All options will show a preview of the attachment and email generated, prompting for confirmation before sending or uploading.
 
 ### Attachments 📎
 

@@ -102,7 +102,7 @@ File sorting works like this:
 
 Negative inventory levels are changed to `0`.
 
-### Backorder & Discontinued Handling
+### Backorder & Discontinued Item Handling
 
 For sites that require backorder dates in their feeds, the program will populate the field with a default date 3 months out from feed creation if the out of stock item is not discontinued. 
 
@@ -122,7 +122,9 @@ Selecting `s` at the main menu will summon:
 ~~~
 
 Selecting `a` will send to all valid sites present in `config.yml`.
+
 Selecting `f` will attempt to connect to an ftp server and upload the relevant file to specified upload directory.
+
 Delecting `s` will prompt you with a list of sites to send to.
 
 ### Attachments 📎

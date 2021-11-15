@@ -165,7 +165,7 @@ def merge_feed(qb_df, site, backorder_site_list, join_key, new_qty, multi_brand=
         inv_feed = get_backorder_date(inv_feed, new_qty, site)
     if multi_brand:
         if not os.path.exists('data/generated-feeds/%s/newest' % site):
-            os.makedir('data/generated-feeds/%s/newest' % site)
+            os.makedirs('data/generated-feeds/%s/newest' % site)
         inv_feed.to_csv(r'data/generated-feeds/%s/newest/%s-feed-%s-%s-[%s].csv' % (
             site, site, brand, date, time), index=False)
         print(
@@ -175,7 +175,7 @@ def merge_feed(qb_df, site, backorder_site_list, join_key, new_qty, multi_brand=
     else:
         sort_feeds("%s" % site)
         if not os.path.exists('data/generated-feeds/%s/newest' % site):
-            os.makedir('data/generated-feeds/%s/newest' % site)
+            os.makedirs('data/generated-feeds/%s/newest' % site)
         inv_feed.to_csv(
             r'data/generated-feeds/%s/newest/%s-feed-%s-[%s].csv' % (site, site, date, time), index=False)
         print(

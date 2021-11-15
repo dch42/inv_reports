@@ -40,7 +40,7 @@ def dir_is_full(max_feeds, site):
 def sort_feeds(site):
     """Sorts generated (site) files for cleanliness and easier email automation"""
     if not os.path.exists('data/generated-feeds/%s/old' % site):
-        os.makedir('data/generated-feeds/%s/old' % site)
+        os.makedirs('data/generated-feeds/%s/old' % site)
     file_sort = "mv -v data/generated-feeds/%s/newest/* data/generated-feeds/%s/old/" % (
         site, site)
     print("Moving unused files to 'old':")

@@ -150,7 +150,7 @@ def gen_email(site):
         print("\n\033[92m\033[1mATTACHMENT:\n\033[0m%s \n(%s)" %
               (attachment_name, attachment_path))
     if not os.path.exists('data/generated-feeds/%s/sent' % site):
-        os.makedir('data/generated-feeds/%s/sent' % site)
+        os.makedirs('data/generated-feeds/%s/sent' % site)
     move_to_sent = "mv -v '%s' data/generated-feeds/%s/sent" % (
         attachment_path, site)
     # set email body text

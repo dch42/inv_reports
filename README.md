@@ -51,6 +51,7 @@ You will be greeted with a menu:
 
 #---------------------------------------------------------------------
 
+Action?: 
 ~~~
 
 Type your selection (`g/s/q`) followed by `Enter`.

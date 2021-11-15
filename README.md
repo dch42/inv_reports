@@ -16,7 +16,7 @@ Running `make` will install dependencies and add executable permissions to relev
 make
 ~~~
 
-Running `make` will also open this README.md with less, followed by opening `config.yml` in nano (free to exit and populate in an editor of your choice). 
+Running `make` will also open this README.md with less, followed by opening `config.yml` in nano (feel free to exit and populate in an editor of your choice). 
 
 ### Config
 

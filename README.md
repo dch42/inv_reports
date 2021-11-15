@@ -133,6 +133,8 @@ All options will show a preview of the attachment and email generated, prompting
 
 Attachments are taken from the ```data/generated-feeds/%brand/newest``` directory, and moved to ```data/generated-feeds/%brand/sent``` after being sent or uploaded as an attachment.
 
+Sites requiring multiple feeds (one feed per brand) are specified in `config.yml`.
+
 ## Acknowledgements ✨
 
 Makes use of the wonderful [🐼 library](https://github.com/pandas-dev/pandas)

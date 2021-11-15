@@ -132,15 +132,15 @@ generated-feeds/
 ├── site
 │   ├── newest
 │   └── old
-|	└── sent
+|└── sent
 ├── site1
 │   ├── newest
 │   └── old
-	└── sent
+└── sent
 ├── site2
 │   ├── newest
 │   └── old
-|	└── sent
+|└── sent
 ~~~
 
 ### Backorder & Discontinued Item Handling

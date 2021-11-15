@@ -4,4 +4,4 @@
 
 init:
 	pip3 install -r requirements.txt
-	chmod +x ./inv-manager/inv_manager.py
+	chmod +x ./inv_manager/inv_manager.py

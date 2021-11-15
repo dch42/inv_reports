@@ -34,7 +34,7 @@ SKUs in template files can be changed/updated, and the generated files will upda
 Run the program (assuming cwd is ./inv-manager):
 
 ~~~
-./inv_feeds.py
+./inv_manager.py
 ~~~
 
 You will be greeted with a menu:

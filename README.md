@@ -51,7 +51,7 @@ You will be greeted with a menu:
 |___|_| |_|\_/      |_|  |_|\__,_|_| |_|\__,_|\__, |\___|_|   
                                               |___/           
 
-QB path: './data/qb_feed.csv'
+Main inventory path: './data/qb_feed.csv'
 Logged in as youraddress@example.com to smtp.example.com on port 465...
 
 Ver. 1.1

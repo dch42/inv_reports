@@ -1,5 +1,5 @@
 # inv-manager
-Automates the creation and sending of inventory feed csv files for dropship portals, updating available quantity levels from a QuickBooks Desktop inventory report.
+Automates the creation and sending of inventory feed csv files for dropship portals, updating available quantity levels from a central inventory report (QuickBooks Desktop compatible).
 
 ## Setup 🔧
 

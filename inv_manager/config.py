@@ -27,6 +27,7 @@ backorder_site_list = (cfg['backorder_site_list'])
 backorder_cols = (cfg['backorder_cols'])
 discontinued_cols = (cfg['discontinued_cols'])
 months_out = (cfg['months'])
+days_before = (cfg['days'])
 
 body_greeting = (cfg['body_greeting'])
 body_text = (cfg['body_text'])

@@ -6,7 +6,8 @@ with open('../config/config.yml', 'r') as stream:
     except Exception as e:
         print(e)
 
-qb_path = (cfg['path_to_qb'])
+main_feed_path = (cfg['path_to_main_feed'])
+feed_cols = (cfg['feed_cols'])
 
 SENDER_EMAIL = (cfg['sender_info']['SENDER_EMAIL'])
 EMAIL_PASSWORD = (cfg['sender_info']['EMAIL_PASSWORD'])
@@ -21,7 +22,6 @@ FTP_UPLOAD_DIR = (cfg['ftp_info']['FTP_UPLOAD_PATH'])
 
 our_company = (cfg['company_name'])
 receiver_info = (cfg['receiver_info'])
-brand_list = (cfg['brand_list'])
 
 backorder_site_list = (cfg['backorder_site_list'])
 backorder_cols = (cfg['backorder_cols'])
@@ -35,3 +35,4 @@ body_closer = (cfg['body_closer'])
 
 site_dic = (cfg['site_dic'])
 rearrange_dic = (cfg['rearrange_dic'])
+multi_brand_dic = (cfg['multi_brand_dic'])

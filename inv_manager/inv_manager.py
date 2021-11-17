@@ -18,7 +18,7 @@ time = datetime.now().time().strftime('%H-%M-%S')
 progver = "1.1"
 
 
-def menu_loop(menu, qb_path):
+def menu_loop(menu, main_feed_path):
     """Persistant modular menu boi"""
     choice = None
     while choice != 'q':
@@ -30,7 +30,7 @@ def menu_loop(menu, qb_path):
         else:
             title = "Inv-Manager"
         pyfiglet.print_figlet("%s" % title)
-        print("QB path: '%s'" % qb_path)
+        print("Main inventory path: '%s'" % main_feed_path)
         print("Logged in as %s to %s on port %s...\n" %
               (SENDER_EMAIL, SMTP_SERVER, SERVER_PORT))
         print("Ver.", progver)
@@ -51,24 +51,24 @@ def menu_loop(menu, qb_path):
             menu[choice][1]()
 
 
-def gen_feed_menu(qb_path):
+def gen_feed_menu(main_feed_path):
     """Generate inventory feeds"""
-    menu_loop(gen_menu, qb_path)
+    menu_loop(gen_menu, main_feed_path)
 
 
 def send_email_menu():
     """Send inventory feeds"""
-    menu_loop(email_menu, qb_path)
+    menu_loop(email_menu, main_feed_path)
 
 
-def import_qb(qb_path):
-    """Import data from QB"""
-    qb_df = pd.read_csv(qb_path, sep=",", encoding="Latin-1",
-                        usecols=['Item', 'Quantity On Hand'])
-    qb_df['Item'] = qb_df['Item'].astype(str)
-    qb_df = qb_df.replace({'(m-)': ''}, regex=True)  # sanitization zone
-    print("\nQB Import Complete: %s\n" % qb_path)
-    return qb_df
+def import_main(main_feed_path):
+    """Import data from main csv"""
+    main_df = pd.read_csv(main_feed_path, sep=",", encoding="Latin-1",
+                          usecols=[feed_cols[0], feed_cols[1]])
+    main_df['Item'] = main_df['Item'].astype(str)
+    # main_df = main_df.replace({'(m-)': ''}, regex=True)  # sanitization zone
+    print("\nMain Inventory Import Complete: %s\n" % main_feed_path)
+    return main_df
 
 
 def gen_by_site(site_dic, backorder_site_list):
@@ -99,11 +99,10 @@ def gen_feeds(sites, site_dic, backorder_site_list):
     print("\n\033[92mGenerating feeds & sorting files...\033[00m\n")
     for site in sites:
         if site:
-            if "multi_brand=True" in site_dic[site.lower()]:
-                gen_multi_brand(qb_df, site, backorder_site_list,
-                                brand_list, site_dic)
+            if site in multi_brand_dic.keys():
+                gen_multi_brand(main_df, site, backorder_site_list, site_dic)
             else:
-                merge_feed(qb_df, "%s" %
+                merge_feed(main_df, "%s" %
                            site, backorder_site_list, *site_dic[site.lower()])
         else:
             print('\aNo feeds to generate...\n\tValid sites:\n')
@@ -120,38 +119,38 @@ def gen_all(site_dic, backorder_site_list):
     print("\n\033[96mOkay, let me open some spreadsheets and...\033[00m")
     print("\n\033[92mGenerating feeds & sorting files...\033[00m\n")
     for key in site_dic:
-        if "multi_brand=True" in site_dic[key.lower()]:
-            gen_multi_brand(qb_df, key, backorder_site_list,
-                            brand_list, site_dic)
+        if key in multi_brand_dic.keys():
+            gen_multi_brand(main_df, key, backorder_site_list, site_dic)
         else:
-            merge_feed(qb_df, "%s" %
+            merge_feed(main_df, "%s" %
                        key, backorder_site_list, *site_dic[key.lower()])
     input("\a\n\033[96m🍻 *clink* Done! Hit 'Enter' to return to menu: \033[00m")
 
 
-def gen_multi_brand(qb_df, site, backorder_site_list, brand_list, site_dic):
+def gen_multi_brand(main_df, site, backorder_site_list, site_dic):
     """Generates separate brand feeds files for single site"""
-    dir_is_full(len(brand_list), site)  # allow multiple files to reside
-    for brand in brand_list:
-        merge_feed(qb_df, site, backorder_site_list, *
+    dir_is_full(len(multi_brand_dic[site]),
+                site)  # allow multiple files to reside
+    for brand in multi_brand_dic[site]:
+        merge_feed(main_df, site, backorder_site_list, *
                    site_dic[site.lower()], brand="%s" % brand)
 
 
-def merge_feed(qb_df, site, backorder_site_list, join_key, new_qty, multi_brand=False, brand=False):
+def merge_feed(main_df, site, backorder_site_list, join_key, new_qty, brand=False):
     """Creates and outputs csv files with updated inventory quantities from df.
     Negative qtys are replaced with 0.
     Generated feeds have index dropped and are exported and sorted if necessary.
     join_key col is reset to default after export is complete.
     """
-    qb_df.rename(columns={'Item': join_key}, inplace=True)
-    if multi_brand:
+    main_df.rename(columns={feed_cols[0]: join_key}, inplace=True)
+    if site in multi_brand_dic.keys():
         site_df = pd.read_csv('data/inventory-templates/%s-%s.csv' %
                               (site, brand), sep=",", encoding="Latin-1", index_col=False)
     else:
         site_df = pd.read_csv('data/inventory-templates/%s.csv' %
                               site, sep=",", encoding="Latin-1", index_col=False)
     site_df[join_key] = site_df[join_key].astype(str)
-    inv_feed = pd.merge(qb_df, site_df, on='%s' %
+    inv_feed = pd.merge(main_df, site_df, on='%s' %
                         join_key, how='inner')  # inner join on key
     # move to qty col & remove qb col
     inv_feed[new_qty] = inv_feed['Quantity On Hand']
@@ -164,7 +163,7 @@ def merge_feed(qb_df, site, backorder_site_list, join_key, new_qty, multi_brand=
         inv_feed = inv_feed[titles]
     if site in backorder_site_list:
         inv_feed = get_backorder_date(inv_feed, new_qty, site)
-    if multi_brand:
+    if site in multi_brand_dic.keys():
         if not os.path.exists('data/generated-feeds/%s/newest' % site):
             os.makedirs('data/generated-feeds/%s/newest' % site)
         inv_feed.to_csv(r'data/generated-feeds/%s/newest/%s-feed-%s-%s-[%s].csv' % (
@@ -183,7 +182,7 @@ def merge_feed(qb_df, site, backorder_site_list, join_key, new_qty, multi_brand=
             "\n✨ \033[1mSuccess!\033[0m \033[92mNew \033[1m%s\033[0m csv file generated at:\033[00m" % site.upper())
         print("\033[92m\033[96m\033[5m==>\033[0m\033[0m data/generated-feeds/%s/newest/%s-feed-%s-[%s].csv\033[00m\n" %
               (site, site, date, time))
-    qb_df.rename(columns={join_key: 'Item'}, inplace=True)
+    main_df.rename(columns={join_key: feed_cols[0]}, inplace=True)
 
 
 def get_backorder_date(inv_feed, new_qty, site):
@@ -226,7 +225,7 @@ def get_backorder_date(inv_feed, new_qty, site):
 
 
 main_menu = {
-    "g": [gen_feed_menu, lambda: gen_feed_menu(qb_path), "(g)enerate feeds"],
+    "g": [gen_feed_menu, lambda: gen_feed_menu(main_feed_path), "(g)enerate feeds"],
     "s": [send_email_menu, lambda: send_email_menu(), "(s)end feeds"]
 
 
@@ -234,7 +233,7 @@ main_menu = {
 
 email_menu = {
     "s": [send_by_site, lambda: send_by_site(receiver_info), "(s)end by site"],
-    "f": [ftp_connect, lambda: ftp_connect(wayfair), "(f)tp upload"],
+    "f": [ftp_connect, lambda: ftp_connect(site), "(f)tp upload"],
     "a": [send_all, lambda: send_all(), "(a)ll"]
 }
 
@@ -252,10 +251,10 @@ if __name__ == '__main__':
         if sys.argv[1] == "--help":
             os.system("less README.md")
             sys.exit(1)
-    if qb_path.lower().endswith('.csv') == True and os.path.isfile(qb_path) == True:
-        qb_path = qb_path
-        qb_df = import_qb(qb_path)
-        menu_loop(main_menu, qb_path)
+    if main_feed_path.lower().endswith('.csv') == True and os.path.isfile(main_feed_path) == True:
+        main_feed_path = main_feed_path
+        main_df = import_main(main_feed_path)
+        menu_loop(main_menu, main_feed_path)
     else:
         print(
-            "\a\n\033[93m⚠️ Path to QB Inventory csv file (%s) is invalid.\nPlease set a valid path in `config/config.yml`\033[00m.\n" % qb_path)
+            "\a\n\033[93m⚠️ Path to main inventory csv file (%s) is invalid.\nPlease set a valid path in `config/config.yml`\033[00m.\n" % qb_path)

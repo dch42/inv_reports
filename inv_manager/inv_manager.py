@@ -151,7 +151,9 @@ def merge_feed(qb_df, site, backorder_site_list, join_key, new_qty, multi_brand=
         site_df = pd.read_csv('data/inventory-templates/%s.csv' %
                               site, sep=",", encoding="Latin-1", index_col=False)
     site_df[join_key] = site_df[join_key].astype(str)
-    inv_feed = pd.merge(qb_df, site_df, on='%s' % join_key, how='inner')
+    inv_feed = pd.merge(qb_df, site_df, on='%s' %
+                        join_key, how='inner')  # inner join on key
+    # move to qty col & remove qb col
     inv_feed[new_qty] = inv_feed['Quantity On Hand']
     del inv_feed['Quantity On Hand']
     inv_feed[new_qty] = inv_feed[new_qty].clip(lower=0)
@@ -186,18 +188,21 @@ def merge_feed(qb_df, site, backorder_site_list, join_key, new_qty, multi_brand=
 
 def get_backorder_date(inv_feed, new_qty, site):
     """Handle backorder/discontinued cols"""
-    for col in inv_feed:
+    for col in inv_feed:  # find relevant cols in df
         if col in discontinued_cols:
             discontinued_col = col
         elif col in backorder_cols:
             backorder_col = col
     backorder_date = date.today() + relativedelta(months=+months_out)
     backorder_date = str(backorder_date)
+    renew_backorder_date = date.today() - relativedelta(days=+days_before)
+    renew_backorder_date = str(renew_backorder_date)
     if backorder_col:
         inv_feed[backorder_col].fillna('', inplace=True)
         inv_feed[backorder_col] = inv_feed[backorder_col].astype(
-            str)
-        if inv_feed.loc[inv_feed[backorder_col] > str(date.today())].empty:
+            str)  # sanitize NaN
+        # check existing date if exists and update/skip
+        if inv_feed.loc[inv_feed[backorder_col] > renew_backorder_date].empty:
             print('Generating new backorder date: %s' % backorder_date)
             inv_feed.loc[inv_feed[new_qty] != 0, [backorder_col]] = ''
             inv_feed.loc[inv_feed[new_qty] == 0,

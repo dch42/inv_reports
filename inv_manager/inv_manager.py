@@ -78,7 +78,7 @@ def gen_by_site(site_dic, backorder_site_list):
     sites = sites_raw = []
     sites_raw = [item for item in input(
         "\nInput sites, seperated by space ('Enter' when done): ").split()]
-    for site in sites_raw:  # remove bogus args
+    for site in sites_raw:  # remove bogus input
         if site in site_dic:
             sites.append(site)
         else:
@@ -94,8 +94,7 @@ def gen_by_site(site_dic, backorder_site_list):
 
 def gen_feeds(sites, site_dic, backorder_site_list):
     """Pass sites to feed generator"""
-    okay = input(
-        "Press 'Enter' to run the feed generator. 'CTRL+C' to quit...: ")
+    input("Press 'Enter' to run the feed generator. 'CTRL+C' to quit...: ")
     print("\n\033[96mOkay, let me open some spreadsheets and...\033[00m")
     print("\n\033[92mGenerating feeds & sorting files...\033[00m\n")
     for site in sites:
@@ -132,7 +131,7 @@ def gen_all(site_dic, backorder_site_list):
 
 def gen_multi_brand(qb_df, site, backorder_site_list, brand_list, site_dic):
     """Generates separate brand feeds files for single site"""
-    dir_is_full(len(brand_list), site)
+    dir_is_full(len(brand_list), site)  # allow multiple files to reside
     for brand in brand_list:
         merge_feed(qb_df, site, backorder_site_list, *
                    site_dic[site.lower()], brand="%s" % brand)
@@ -195,16 +194,37 @@ def get_backorder_date(inv_feed, new_qty, site):
     backorder_date = date.today() + relativedelta(months=+months_out)
     backorder_date = str(backorder_date)
     if backorder_col:
-        inv_feed.loc[inv_feed[new_qty] != 0, [backorder_col]] = ""
-        inv_feed.loc[inv_feed[new_qty] == 0, [backorder_col]] = backorder_date
-    if discontinued_col:
-        inv_feed.loc[inv_feed[discontinued_col].notna(), [backorder_col]] = ""
+        inv_feed[backorder_col].fillna('', inplace=True)
+        inv_feed[backorder_col] = inv_feed[backorder_col].astype(
+            str)
+        if inv_feed.loc[inv_feed[backorder_col] > str(date.today())].empty:
+            print('Generating new backorder date: %s' % backorder_date)
+            inv_feed.loc[inv_feed[new_qty] != 0, [backorder_col]] = ''
+            inv_feed.loc[inv_feed[new_qty] == 0,
+                         [backorder_col]] = backorder_date
+            if discontinued_col:
+                inv_feed.loc[inv_feed[discontinued_col].notna(), [
+                    backorder_col]] = ''
+            print('Updating template...\n')
+            if not os.path.exists('data/inventory-templates/old'):
+                os.makedirs('data/inventory-templates/old')
+            print('Moving old template to data/inventory-templates/old/...')
+            move_old_template = 'mv data/inventory-templates/%s.csv data/inventory-templates/old/%s-old-%s%s.csv' % (
+                site, site, date, time)
+            os.system(move_old_template)
+            inv_feed.to_csv(
+                r'data/inventory-templates/%s.csv' % (site), index=False)
+            print(
+                '\n\033[92m\033[96m\033[5m==>\033[0m\033[0m Created updated template: data/inventory-templates/%s.csv\n' % site)
+
     return inv_feed
 
 
 main_menu = {
     "g": [gen_feed_menu, lambda: gen_feed_menu(qb_path), "(g)enerate feeds"],
     "s": [send_email_menu, lambda: send_email_menu(), "(s)end feeds"]
+
+
 }
 
 email_menu = {

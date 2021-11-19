@@ -3,7 +3,6 @@
 import os
 import sys
 import time
-import argparse
 from datetime import date, datetime, time
 from dateutil.relativedelta import relativedelta
 import numpy as np
@@ -80,7 +79,7 @@ def import_main_feed():
     df = pd.read_csv(main_feed_path, sep=",", encoding="Latin-1",
                      usecols=[feed_cols[0], feed_cols[1]])
     df[feed_cols[0]] = df[feed_cols[0]].astype(str)
-    # main_df = main_df.replace({'(m-)': ''}, regex=True)  # sanitization zone
+    # df = df.replace({'(m-)': ''}, regex=True)  # sanitization zone
     print(f"\nMain Inventory Import Complete: {main_feed_path}\n")
     return main_df
 
@@ -262,13 +261,3 @@ if __name__ == '__main__':
     else:
         print(
             f"\a\n\033[93m⚠️ Path to main inventory csv file ({main_feed_path}) is invalid.\nPlease set a valid path in `config/config.yml`\033[00m.\n")
-
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--verbose", help="print with increased verbosity")
-    # parser.add_argument("--site", help="pass sites to generate for")
-    # parser.add_argument(
-    #     "--silent", help="run with no confirmation and no output to console")
-
-    # args = parser.parse_args()
-    # if args.verbose:
-    #     print("verbosity turned on")

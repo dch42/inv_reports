@@ -12,9 +12,9 @@ def sites_to_gen(sites, dic):
         if site == 'all':
             for key in dic:
                 if key != 'all':
-                    print("\t", key)
+                    print(f'\t {key}')
         else:
-            print("\t", site)
+            print(f'\t {site}')
     print("\n")
 
 
@@ -26,12 +26,12 @@ def list_dir_ignore_hidden(path):
 def print_sites(dic):
     """Prints all valid site names from site_dic"""
     for key in dic:
-        print("\t", key)
+        print(f"\t {key}")
 
 
 def dir_is_full(max_feeds, site):
     """Allows multiple feeds to reside in newest before moving to old"""
-    newest_folder = Path('data/generated-feeds/%s/newest/' % site)
+    newest_folder = Path(f'data/generated-feeds/{site}/newest/')
     is_dir_full = list_dir_ignore_hidden(newest_folder)
     if len(is_dir_full) >= max_feeds:
         sort_feeds(site)
@@ -39,9 +39,8 @@ def dir_is_full(max_feeds, site):
 
 def sort_feeds(site):
     """Sorts generated (site) files for cleanliness and easier email automation"""
-    if not os.path.exists('data/generated-feeds/%s/old' % site):
-        os.makedirs('data/generated-feeds/%s/old' % site)
-    file_sort = "mv -v data/generated-feeds/%s/newest/* data/generated-feeds/%s/old/" % (
-        site, site)
+    if not os.path.exists(f'data/generated-feeds/{site}/old'):
+        os.makedirs(f'data/generated-feeds/{site}/old')
+    file_sort = f"mv -v data/generated-feeds/{site}/newest/* data/generated-feeds/{site}/old/"
     print("Moving unused files to 'old':")
     os.system(file_sort)

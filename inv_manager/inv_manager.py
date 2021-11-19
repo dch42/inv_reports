@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import pyfiglet
+import argparse
 import numpy as np
 import pandas as pd
 from config import *
@@ -29,10 +30,10 @@ def menu_loop(menu, main_feed_path):
             title = "Send Feeds"
         else:
             title = "Inv-Manager"
-        pyfiglet.print_figlet("%s" % title)
-        print("Main inventory path: '%s'" % main_feed_path)
-        print("Logged in as %s to %s on port %s...\n" %
-              (SENDER_EMAIL, SMTP_SERVER, SERVER_PORT))
+        pyfiglet.print_figlet(f"{title}")
+        print(f"Main inventory path: '{main_feed_path}'")
+        print(
+            f"Logged in as {SENDER_EMAIL} to {SMTP_SERVER} on port {SERVER_PORT}...\n")
         print("Ver.", progver)
         print("Pandas version: " + pd.__version__)
         print("Numpy version: " + np.__version__)
@@ -41,8 +42,8 @@ def menu_loop(menu, main_feed_path):
 # Menu
 # ---------------------------------------------------------------------\033[0m\n""")
         for key, value in menu.items():
-            print('\033[96m%s:\033[0m \033[95m%s\033[0m' %
-                  (value[2], value[0].__doc__))
+            print(
+                f'\033[96m{value[2]}:\033[0m \033[95m{value[0].__doc__}\033[0m')
         print("\033[96m(q)uit/back\033[0m")
         print(
             """\n\033[1m#---------------------------------------------------------------------\033[0m\n""")
@@ -65,9 +66,9 @@ def import_main(main_feed_path):
     """Import data from main csv"""
     main_df = pd.read_csv(main_feed_path, sep=",", encoding="Latin-1",
                           usecols=[feed_cols[0], feed_cols[1]])
-    main_df['Item'] = main_df['Item'].astype(str)
+    main_df[feed_cols[0]] = main_df[feed_cols[0]].astype(str)
     # main_df = main_df.replace({'(m-)': ''}, regex=True)  # sanitization zone
-    print("\nMain Inventory Import Complete: %s\n" % main_feed_path)
+    print(f"\nMain Inventory Import Complete: {main_feed_path}\n")
     return main_df
 
 
@@ -76,15 +77,15 @@ def gen_by_site(site_dic, backorder_site_list):
     print("Valid sites:")
     print_sites(site_dic)
     sites = sites_raw = []
-    sites_raw = [item for item in input(
-        "\nInput sites, seperated by space ('Enter' when done): ").split()]
+    sites_raw = input(
+        "\nInput sites, seperated by space ('Enter' when done): ").split()
     for site in sites_raw:  # remove bogus input
         if site in site_dic:
             sites.append(site)
         else:
-            print("\n\033[93m⚠️  Warning! No record of site '%s'...\033[00m\n\033[91m==> Removing '%s' from queue...\033[00m"
-                  % (site, site))
-    if len(sites) > 0:
+            print(
+                f"\n\033[93m⚠️  Warning! No record of site '{site}'...\033[00m\n\033[91m==> Removing '{site}' from queue...\033[00m")
+    if sites:
         print("\n\033[96mGenerating feeds for:\033[00m\n")
         sites_to_gen(sites, site_dic)
         gen_feeds(sites, site_dic, backorder_site_list)
@@ -102,8 +103,8 @@ def gen_feeds(sites, site_dic, backorder_site_list):
             if site in multi_brand_dic.keys():
                 gen_multi_brand(main_df, site, backorder_site_list, site_dic)
             else:
-                merge_feed(main_df, "%s" %
-                           site, backorder_site_list, *site_dic[site.lower()])
+                merge_feed(main_df, site, backorder_site_list,
+                           *site_dic[site.lower()])
         else:
             print('\aNo feeds to generate...\n\tValid sites:\n')
             print_sites(site_dic)
@@ -164,24 +165,24 @@ def merge_feed(main_df, site, backorder_site_list, join_key, new_qty, brand=Fals
     if site in backorder_site_list:
         inv_feed = get_backorder_date(inv_feed, new_qty, site)
     if site in multi_brand_dic.keys():
-        if not os.path.exists('data/generated-feeds/%s/newest' % site):
-            os.makedirs('data/generated-feeds/%s/newest' % site)
-        inv_feed.to_csv(r'data/generated-feeds/%s/newest/%s-feed-%s-%s-[%s].csv' % (
-            site, site, brand, date, time), index=False)
+        if not os.path.exists(f'data/generated-feeds/{site}/newest'):
+            os.makedirs(f'data/generated-feeds/{site}/newest')
+        inv_feed.to_csv(
+            fr'data/generated-feeds/{site}/newest/{site}-feed-{brand}-{date}-[{time}].csv', index=False)
         print(
-            "\n✨ \033[1mSuccess!\033[0m \033[92mNew \033[1m%s - %s\033[0m csv file generated at:\033[00m" % (site.upper(), brand.upper()))
-        print("\033[92m\033[96m\033[5m==>\033[0m\033[0m data/generated-feeds/%s/newest/%s-feed-%s-%s-[%s].csv\033[00m" %
-              (site, site, brand, date, time))
+            f"\n✨ \033[1mSuccess!\033[0m \033[92mNew \033[1m{site.upper()} - {brand.upper()}\033[0m csv file generated at:\033[00m")
+        print(
+            f'\033[92m\033[96m\033[5m==>\033[0m\033[0m data/generated-feeds/{site}/newest/{site}-feed-{brand}-{date}-[{time}].csv\033[00m\n')
     else:
         sort_feeds("%s" % site)
-        if not os.path.exists('data/generated-feeds/%s/newest' % site):
-            os.makedirs('data/generated-feeds/%s/newest' % site)
+        if not os.path.exists(f'data/generated-feeds/{site}/newest'):
+            os.makedirs(f'data/generated-feeds/{site}/newest')
         inv_feed.to_csv(
-            r'data/generated-feeds/%s/newest/%s-feed-%s-[%s].csv' % (site, site, date, time), index=False)
+            fr'data/generated-feeds/{site}/newest/{site}-feed-{date}-[{time}].csv', index=False)
         print(
-            "\n✨ \033[1mSuccess!\033[0m \033[92mNew \033[1m%s\033[0m csv file generated at:\033[00m" % site.upper())
-        print("\033[92m\033[96m\033[5m==>\033[0m\033[0m data/generated-feeds/%s/newest/%s-feed-%s-[%s].csv\033[00m\n" %
-              (site, site, date, time))
+            f"\n✨ \033[1mSuccess!\033[0m \033[92mNew \033[1m{site.upper()}\033[0m csv file generated at:\033[00m")
+        print(
+            f'\033[92m\033[96m\033[5m==>\033[0m\033[0m data/generated-feeds/{site}/newest/{site}-feed-{date}-[{time}].csv\033[00m\n')
     main_df.rename(columns={join_key: feed_cols[0]}, inplace=True)
 
 
@@ -202,24 +203,23 @@ def get_backorder_date(inv_feed, new_qty, site):
             str)  # sanitize NaN
         # check existing date if exists and update/skip
         if inv_feed.loc[inv_feed[backorder_col] > renew_backorder_date].empty:
-            print('Generating new backorder date: %s' % backorder_date)
+            print(f"Generating new backorder date: {backorder_date}")
             inv_feed.loc[inv_feed[new_qty] != 0, [backorder_col]] = ''
             inv_feed.loc[inv_feed[new_qty] == 0,
                          [backorder_col]] = backorder_date
             if discontinued_col:
                 inv_feed.loc[inv_feed[discontinued_col].notna(), [
                     backorder_col]] = ''
-            print('Updating template...\n')
+            print("Updating template...\n")
             if not os.path.exists('data/inventory-templates/old'):
                 os.makedirs('data/inventory-templates/old')
-            print('Moving old template to data/inventory-templates/old/...')
-            move_old_template = 'mv data/inventory-templates/%s.csv data/inventory-templates/old/%s-old-%s%s.csv' % (
-                site, site, date, time)
+            print("Moving old template to data/inventory-templates/old/...")
+            move_old_template = f'mv data/inventory-templates/{site}.csv data/inventory-templates/old/{site}-old-{date}{time}.csv'
             os.system(move_old_template)
             inv_feed.to_csv(
-                r'data/inventory-templates/%s.csv' % (site), index=False)
+                fr'data/inventory-templates/{site}.csv', index=False)
             print(
-                '\n\033[92m\033[96m\033[5m==>\033[0m\033[0m Created updated template: data/inventory-templates/%s.csv\n' % site)
+                f'\n\033[92m\033[96m\033[5m==>\033[0m\033[0m Created updated template: data/inventory-templates/{site}.csv\n')
 
     return inv_feed
 
@@ -247,14 +247,10 @@ gen_menu = {
 # ---------------------------------------------------------------------
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "--help":
-            os.system("less README.md")
-            sys.exit(1)
-    if main_feed_path.lower().endswith('.csv') == True and os.path.isfile(main_feed_path) == True:
+    if main_feed_path.lower().endswith('.csv') is True and os.path.isfile(main_feed_path) is True:
         main_feed_path = main_feed_path
         main_df = import_main(main_feed_path)
         menu_loop(main_menu, main_feed_path)
     else:
         print(
-            "\a\n\033[93m⚠️ Path to main inventory csv file (%s) is invalid.\nPlease set a valid path in `config/config.yml`\033[00m.\n" % qb_path)
+            f"\a\n\033[93m⚠️ Path to main inventory csv file ({main_feed_path}) is invalid.\nPlease set a valid path in `config/config.yml`\033[00m.\n")

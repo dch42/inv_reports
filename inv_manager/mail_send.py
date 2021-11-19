@@ -133,8 +133,10 @@ def create_emails(count, sites, mail_to_send):
     """Begin email creation loop"""
     for site in sites:
         while count <= len(sites):
+            print("total = ", 13+len(str(count)) +
+                  len(str(len(sites)))+len(site))
             print(
-                f"\n\033[92m{hash}\n# Email #{count}/{len(sites)} ({site.upper()})\n#{dash}#\033[00m")
+                f"\n\033[92m{hash}\n# Email #{count}/{len(sites)} ({site.upper()})"+(69-(13+len(str(count))+len(str(len(sites)))+len(site)))*" "+f"#\n#{dash}#\033[00m")
             gen_email(site, mail_to_send)
             count += 1
             break

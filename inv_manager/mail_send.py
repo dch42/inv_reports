@@ -35,23 +35,26 @@ date = datetime.now().date()
 time = datetime.now().time().strftime('%H:%M:%S')
 
 
-def ftp_connect(site):
-    """Upload inventory files via FTP"""
-    ftp_server = FTP(FTP_HOST)
-    ftp_server.login(FTP_USER, FTP_PASSWORD)
-    print(f"\n\033[92m\033[1mLOGGED IN:\033[00m {FTP_USER}@{FTP_HOST}\n")
-    ftp_server.encoding = "utf-8"
-    print("\n\033[92m\033[1mWELCOME MSG:\033[00m\n")
-    print(ftp_server.getwelcome())
-    print("\n\033[92m\033[1mDIRECTORIES:\033[00m\n")
-    ftp_server.retrlines('LIST')
-    print(f"\n\033[92m\033[1mCWD is:\033[00m {ftp_server.pwd()}\n")
-    print(f"Moving to {FTP_UPLOAD_DIR}...")
-    ftp_server.cwd(f"{FTP_UPLOAD_DIR}")
-    print(f"\n\033[92m\033[1mCWD is:\033[00m {ftp_server.pwd()}\n")
-    ftp_upload(site, ftp_server)
-    ftp_server.quit()
-    input("\a\n\033[96m🍻 *clink* Done! Hit 'Enter' to return to menu: \033[00m")
+def ftp_connect():
+    """Upload inventory files via FTP"""  # TODO make dic to allow for multiple site/ftp configs
+    sites = validate_sites()
+    for site in sites:
+        ftp_server = FTP(FTP_HOST)
+        ftp_server.login(FTP_USER, FTP_PASSWORD)
+        print(f"\n\033[92m\033[1mLOGGED IN:\033[00m {FTP_USER}@{FTP_HOST}\n")
+        ftp_server.encoding = "utf-8"
+        print("\n\033[92m\033[1mWELCOME MSG:\033[00m\n")
+        print(ftp_server.getwelcome())
+        print("\n\033[92m\033[1mDIRECTORIES:\033[00m\n")
+        ftp_server.retrlines('LIST')
+        print(f"\n\033[92m\033[1mCWD is:\033[00m {ftp_server.pwd()}\n")
+        print(f"Moving to {FTP_UPLOAD_DIR}...")
+        ftp_server.cwd(f"{FTP_UPLOAD_DIR}")
+        print(f"\n\033[92m\033[1mCWD is:\033[00m {ftp_server.pwd()}\n")
+        ftp_upload(site, ftp_server)
+        ftp_server.quit()
+        input(
+            "\a\n\033[96m🍻 *clink* Done! Hit 'Enter' to return to menu: \033[00m")
 
 
 def ftp_upload(site, server):
@@ -85,9 +88,8 @@ def init_mail():
     return mail_to_send
 
 
-def send_by_site(dic):
-    """Send inventory emails to select sites"""
-    mail_to_send = init_mail()
+def validate_sites(dic):
+    """Validate user input"""
     print("Valid sites:")
     print_sites(dic)
     sites = sites_raw = []
@@ -99,6 +101,13 @@ def send_by_site(dic):
         else:
             print(
                 f"\n\033[93m⚠️  Warning! No record of site '{site}'...\033[00m\n\033[91m==> Removing '{site}' from queue...\033[00m")
+    return sites
+
+
+def send_by_site():
+    """Send inventory emails to select sites"""
+    mail_to_send = init_mail()
+    sites = validate_sites(receiver_info)
     if sites:
         print("\n\033[96mGenerating emails for:\033[00m\n")
         sites_to_gen(sites, receiver_info)

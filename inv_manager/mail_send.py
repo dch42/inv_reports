@@ -9,9 +9,9 @@ from pathlib import Path
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
-from datetime import date, datetime, time
 from email.mime.multipart import MIMEMultipart
-from helper import *
+from datetime import date, datetime, time
+from helper import list_dir_ignore_hidden, sites_to_gen, print_sites
 from config import cfg
 
 
@@ -67,26 +67,27 @@ def ftp_upload(site, server):
             print(f"\tUpload Complete: {attachment[0]} >> {server.pwd()}")
 
 
-def get_file(site):  # TODO squash and add multi handling
-    """finds info for newest file to attach for site"""
-    newest_folder = Path(f'data/generated-feeds/{site}/newest/')
-    newest_feeds = newest_folder.iterdir()
-    is_empty_dir = list_dir_ignore_hidden(newest_folder)
-    if len(is_empty_dir):
-        for item in newest_feeds:
-            if item.is_file():
-                attachment_name = item.name
-                if attachment_name.endswith('.csv'):
-                    attachment_path = f'data/generated-feeds/{site}/newest/{attachment_name}'
-    else:
+def init_mail():
+    """Log in to email server"""
+    try:
+        mail_to_send = smtplib.SMTP_SSL(
+            SMTP_SERVER, SERVER_PORT)
+        mail_to_send.ehlo()
+        mail_to_send.login(SENDER_EMAIL, EMAIL_PASSWORD)
         print(
-            f"\a\033[93mWarning: No files to attach! \n\t('{site}/newest' directory is empty, please generate another feed or put one in manually)\n\033[0m")
+            f"\n\033[92m[SUCCESS]\033[0m: \033[96m\033[5m📧 \033[0m\033[0mLogged in as {SENDER_EMAIL} to {SMTP_SERVER} on port {SERVER_PORT}...\n")
+    except Exception as error:
+        print(f"\a\n\033[91m[ERROR]: {error}\033[0m\n")
+        input(
+            "😞 Connection failed.\n\nMaybe inspecting `Email Account Info` in config file will help?\n\nPress `ENTER` to edit config file or `CTRL+C` to quit...")
+        os.system("nano ../config/config.yml")
         sys.exit(1)
-    return attachment_name, attachment_path
+    return mail_to_send
 
 
 def send_by_site(dic):
     """Send inventory emails to select sites"""
+    mail_to_send = init_mail()
     print("Valid sites:")
     print_sites(dic)
     sites = sites_raw = []
@@ -109,24 +110,27 @@ def send_by_site(dic):
                 print("1 email will be generated...")
                 print("\033[92mGenerating your email...\033[00m\n")
         count = 1
-        create_emails(count, sites)
+        create_emails(count, sites, mail_to_send)
+        mail_to_send.quit()
+        input(
+            "\a\n\033[96m🍻 *clink* Done! Hit 'Enter' to return to menu: \033[00m")
     else:
         input("\a\n😞 Nothing to do...hit 'Enter' to return to menu: \033[00m")
-    input("\a\n\033[96m🍻 *clink* Done! Hit 'Enter' to return to menu: \033[00m")
 
 
-def create_emails(count, sites):
+def create_emails(count, sites, mail_to_send):
+    """Begin email creation loop"""
     for site in sites:
         while count <= len(sites):
             print(f"""\n\033[92m#######################################################################
 # Email #{count}/{len(sites)} ({site.upper()})
 # ---------------------------------------------------------------------\033[00m""")
-            gen_email(site)
+            gen_email(site, mail_to_send)
             count += 1
             break
 
 
-def gen_email(site):
+def gen_email(site, mail_to_send):
     """Generates email and shows preview"""
     receiver_email, greeting_name, site_name = receiver_info[
         site][0], receiver_info[site][2], receiver_info[site][1]
@@ -134,38 +138,16 @@ def gen_email(site):
     msg = MIMEMultipart()  # start crafting msg
     msg['From'] = f"{our_company}<{SENDER_EMAIL}>"
     msg['To'], msg['Subject'] = receiver_email, mail_subj
-    newest_folder = Path(f'data/generated-feeds/{site}/newest/')
-    newest_feeds = newest_folder.iterdir()
-    is_empty_dir = list_dir_ignore_hidden(newest_folder)
-    if len(is_empty_dir):
-        attachment_list = []  # for multiple files
-        for item in newest_feeds:
-            if item.is_file():
-                attachment_name = item.name
-                if attachment_name.endswith('.csv'):
-                    attachment_path = f'data/generated-feeds/{site}/newest/{attachment_name}'
-                    # open and attach file
-                    part = MIMEBase('application', 'octet-stream')
-                    part.set_payload(open(attachment_path, "rb").read())
-                    encoders.encode_base64(part)
-                    part.add_header('Content-Disposition', 'attachment',
-                                    filename=attachment_name)
-                    msg.attach(part)
-                    attachment_list.append(attachment_name)
-    else:
-        print(
-            "\a\033[93mWarning: No files to attach! \n\t('{site}/newest' directory is empty, please generate another feed or put one in manually)\n\033[0m")
-        sys.exit(1)
-    if len(attachment_list) > 1:
+    attachment = get_file(site, msg, email=True)
+    msg = attachment[3]
+    if len(attachment[2]) > 1:
         print("\n\033[92m\033[1mATTACHMENTS:\033[0m")
-        for attachment in attachment_list:
-            print(attachment)
+        for item in attachment[2]:
+            print(item)
     else:
         print(
-            f'\n\033[92m\033[1mATTACHMENT:\n\033[0m{attachment_name} \n({attachment_path})')
-    if not os.path.exists(f'data/generated-feeds/{site}/sent'):
-        os.makedirs(f'data/generated-feeds/{site}/sent')
-    move_to_sent = f"mv -v '{attachment_path}' data/generated-feeds/{site}/sent"
+            f'\n\033[92m\033[1mATTACHMENT:\n\033[0m{attachment[0]} \n({attachment[1]})')
+
     # set body text
     mail_body = f"{body_greeting} {greeting_name},\n\n{body_text}\n\n{body_closer}\n{our_company}"
     mail_body = MIMEText(mail_body)  # MIME it and attach
@@ -176,11 +158,41 @@ def gen_email(site):
     print(mail_body)
     print("""\n\033[92m#---------------------------------------------------------------------
 # End of email
-######################################################################## \033[00m""")
-    send_email(msg, receiver_email, greeting_name, move_to_sent)
+#######################################################################\033[00m""")
+    send_email(msg, receiver_email, greeting_name,
+               attachment, mail_to_send, site)
 
 
-def send_email(msg, receiver_email, greeting_name, move_to_sent):
+def get_file(site, msg, email=False):
+    """finds info for newest file to attach for site"""
+    attachment_list = []  # for multiple files
+    newest_folder = Path(f'data/generated-feeds/{site}/newest/')
+    newest_feeds = newest_folder.iterdir()
+    is_empty_dir = list_dir_ignore_hidden(newest_folder)
+    if len(is_empty_dir):
+        for item in newest_feeds:
+            if item.is_file():
+                attachment_name = item.name
+                if attachment_name.endswith('.csv'):
+                    attachment_path = f'data/generated-feeds/{site}/newest/{attachment_name}'
+                    if email:
+                        with open(attachment_path, 'rb') as file:
+                            part = MIMEBase('application', 'octet-stream')
+                            part.set_payload(file.read())
+                            encoders.encode_base64(part)
+                            part.add_header('Content-Disposition',
+                                            'attachment', filename=attachment_name)
+                            msg.attach(part)
+                            attachment_list.append(attachment_name)
+
+    else:
+        print(
+            f"\a\033[93m⚠️  Warning: No files to attach! \n\t('{site}/newest' directory is empty, please generate another feed or put one in manually)\n\033[0m")
+        sys.exit(1)
+    return attachment_name, attachment_path, attachment_list, msg
+
+
+def send_email(msg, receiver_email, greeting_name, attachment, mail_to_send, site):
     """Sends generated emails upon approval, moving sent attachments to `sent` upon completion"""
     send_okay = input('\nDo you want to send this email? (y/N): ')
     if send_okay.lower() != 'y':
@@ -191,21 +203,16 @@ def send_email(msg, receiver_email, greeting_name, move_to_sent):
                               msg.as_string())  # sendit.exe
         print(
             f"\n\033[92mEmail successfully sent to {receiver_email} ({greeting_name}) at {time}\033[0m\n")
-        os.system(move_to_sent)  # move file to sent if attachment exists
+        if not os.path.exists(f'data/generated-feeds/{site}/sent'):
+            os.makedirs(f'data/generated-feeds/{site}/sent')
+        for item in attachment[2]:
+            move_to_sent = f"mv -v 'data/generated-feeds/{site}/newest/{item}' data/generated-feeds/{site}/sent"
+            os.system(move_to_sent)  # move file to sent if attachment exists
 
 
 def send_all():
     """Send inventory emails to all sites"""
+    mail_to_send = init_mail()
     count = 1
-    create_emails(count, receiver_info)
+    create_emails(count, receiver_info, mail_to_send)
     mail_to_send.quit()
-
-# ---------------------------------------------------------------------
-# The main event
-# ---------------------------------------------------------------------
-
-
-mail_to_send = smtplib.SMTP_SSL(
-    SMTP_SERVER, SERVER_PORT)  # log in to email server
-mail_to_send.ehlo()
-mail_to_send.login(SENDER_EMAIL, EMAIL_PASSWORD)

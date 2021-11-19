@@ -15,6 +15,8 @@ from config import cfg
 date = datetime.now().date()
 time = datetime.now().time().strftime('%H-%M-%S')
 
+dash = 70*'-'
+
 PROG_VER = "1.1"
 
 main_feed_path = (cfg['path_to_main_feed'])
@@ -50,15 +52,12 @@ def menu_loop(menu):
         print("Pandas version: " + pd.__version__)
         print("Numpy version: " + np.__version__)
         print("\n\033[92mCreate and send updated inventory feed csv files to dropship portals.\n\n\tThe new feeds are saved in `data/generated-feeds`.\n\tThe templates are stored in `data/inventory-templates`.\033[00m\n")
-        dash = 69*'_'
-        print(f"""\n\033[1m#{dash}
-# Menu
-#{dash}\033[0m\n""")
+        print(f"\n\033[1m#{dash}\n# Menu\n#{dash}\033[0m\n")
         for key, value in menu.items():
             print(
                 f'\033[96m{value[2]}:\033[0m \033[95m{value[0].__doc__}\033[0m')
         print("\033[96m(q)uit/back\033[0m")
-        print(f"""\n\033[1m#{dash}\033[0m\n""")
+        print(f"\n\033[1m#{dash}\033[0m\n")
         choice = input('\nAction?: ').lower().strip()
         if choice in menu:
             menu[choice][1]()

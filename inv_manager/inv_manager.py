@@ -50,15 +50,15 @@ def menu_loop(menu):
         print("Pandas version: " + pd.__version__)
         print("Numpy version: " + np.__version__)
         print("\n\033[92mCreate and send updated inventory feed csv files to dropship portals.\n\n\tThe new feeds are saved in `data/generated-feeds`.\n\tThe templates are stored in `data/inventory-templates`.\033[00m\n")
-        print("""\n\033[1m#---------------------------------------------------------------------
+        dash = 69*'_'
+        print(f"""\n\033[1m#{dash}
 # Menu
-# ---------------------------------------------------------------------\033[0m\n""")
+#{dash}\033[0m\n""")
         for key, value in menu.items():
             print(
                 f'\033[96m{value[2]}:\033[0m \033[95m{value[0].__doc__}\033[0m')
         print("\033[96m(q)uit/back\033[0m")
-        print(
-            """\n\033[1m#---------------------------------------------------------------------\033[0m\n""")
+        print(f"""\n\033[1m#{dash}\033[0m\n""")
         choice = input('\nAction?: ').lower().strip()
         if choice in menu:
             menu[choice][1]()
@@ -81,6 +81,7 @@ def import_main_feed():
     df[feed_cols[0]] = df[feed_cols[0]].astype(str)
     # df = df.replace({'(m-)': ''}, regex=True)  # sanitization zone
     print(f"\nMain Inventory Import Complete: {main_feed_path}\n")
+    main_df = df
     return main_df
 
 

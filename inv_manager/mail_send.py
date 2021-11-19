@@ -14,7 +14,6 @@ from datetime import date, datetime, time
 from helper import list_dir_ignore_hidden, sites_to_gen, print_sites
 from config import cfg
 
-
 SENDER_EMAIL = (cfg['sender_info']['SENDER_EMAIL'])
 EMAIL_PASSWORD = (cfg['sender_info']['EMAIL_PASSWORD'])
 SMTP_SERVER = (cfg['sender_info']['SMTP_SERVER'])
@@ -33,6 +32,9 @@ body_closer = (cfg['body_closer'])
 
 date = datetime.now().date()
 time = datetime.now().time().strftime('%H:%M:%S')
+
+dash = 68*'-'
+hash = 70*'#'
 
 
 def ftp_connect():
@@ -131,9 +133,8 @@ def create_emails(count, sites, mail_to_send):
     """Begin email creation loop"""
     for site in sites:
         while count <= len(sites):
-            print(f"""\n\033[92m#######################################################################
-# Email #{count}/{len(sites)} ({site.upper()})
-# ---------------------------------------------------------------------\033[00m""")
+            print(
+                f"\n\033[92m{hash}\n# Email #{count}/{len(sites)} ({site.upper()})\n#{dash}#\033[00m")
             gen_email(site, mail_to_send)
             count += 1
             break
@@ -165,9 +166,7 @@ def gen_email(site, mail_to_send):
     print(
         f'\033[92m\033[1mSEND TO:\n\033[0m{greeting_name} ({receiver_email})\n\033[92m\033[1mSUBJECT:\n\033[0m{mail_subj}\n\033[92m\033[1mBODY:\033[0m')
     print(mail_body)
-    print("""\n\033[92m#---------------------------------------------------------------------
-# End of email
-#######################################################################\033[00m""")
+    print(f"\n\033[92m#{dash}#\n# End of email"+55*" "+f"#\n{hash}\033[00m")
     send_email(msg, receiver_email, greeting_name,
                attachment, mail_to_send, site)
 

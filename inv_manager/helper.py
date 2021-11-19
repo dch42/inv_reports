@@ -6,6 +6,10 @@ import os
 from pathlib import Path
 
 
+def cheers():
+    input("\a\n\033[96m🍻 *clink* Done! Hit 'ENTER' to return to menu: \033[00m")
+
+
 def sites_to_gen(sites, dic):
     """List sites to be passed to generator"""
     for site in sites:

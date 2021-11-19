@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 import numpy as np
 import pandas as pd
 import pyfiglet
-from helper import sites_to_gen, print_sites, dir_is_full, sort_feeds
+from helper import cheers, sites_to_gen, print_sites, dir_is_full, sort_feeds
 from mail_send import send_all, send_by_site, ftp_connect
 from config import cfg
 
@@ -120,14 +120,13 @@ def gen_feeds(sites):
             print('\aNo feeds to generate...\n\tValid sites:\n')
             print_sites(site_dic)
             sys.exit(1)
-    input("\a\n\033[96m🍻 *clink* Done! Hit 'Enter' to return to menu: \033[00m")
+    cheers()
 
 
 def gen_all():
     """Generate all feeds"""
     print("Generating feeds for all valid sites...\n")
-    okay = input(
-        "Press 'Enter' to run the feed generator. 'CTRL+C' to quit...: ")
+    input("Press 'Enter' to run the feed generator. 'CTRL+C' to quit...: ")
     print("\n\033[96mOkay, let me open some spreadsheets and...\033[00m")
     print("\n\033[92mGenerating feeds & sorting files...\033[00m\n")
     for key in site_dic:
@@ -135,7 +134,7 @@ def gen_all():
             gen_multi_brand(key)
         else:
             merge_feed(key, *site_dic[key.lower()])
-    input("\a\n\033[96m🍻 *clink* Done! Hit 'Enter' to return to menu: \033[00m")
+    cheers()
 
 
 def gen_multi_brand(site):

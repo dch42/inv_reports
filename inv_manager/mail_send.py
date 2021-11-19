@@ -11,7 +11,7 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import date, datetime, time
-from helper import list_dir_ignore_hidden, sites_to_gen, print_sites
+from helper import cheers, list_dir_ignore_hidden, sites_to_gen, print_sites
 from config import cfg
 
 SENDER_EMAIL = (cfg['sender_info']['SENDER_EMAIL'])
@@ -55,8 +55,7 @@ def ftp_connect():
         print(f"\n\033[92m\033[1mCWD is:\033[00m {ftp_server.pwd()}\n")
         ftp_upload(site, ftp_server)
         ftp_server.quit()
-        input(
-            "\a\n\033[96m🍻 *clink* Done! Hit 'Enter' to return to menu: \033[00m")
+        cheers()
 
 
 def ftp_upload(site, server):
@@ -123,8 +122,7 @@ def send_by_site():
         count = 1
         create_emails(count, sites, mail_to_send)
         mail_to_send.quit()
-        input(
-            "\a\n\033[96m🍻 *clink* Done! Hit 'Enter' to return to menu: \033[00m")
+        cheers()
     else:
         input("\a\n😞 Nothing to do...hit 'Enter' to return to menu: \033[00m")
 

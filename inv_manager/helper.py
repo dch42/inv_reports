@@ -70,7 +70,7 @@ def dir_is_full(max_feeds, site):
         sort_files(site, 'old', 'generated-feeds', '*', 'newest')
 
 
-def sort_files(site, destination, dir1, item, dir2=False):
+def sort_files(site, destination, dir1, item, dir2):
     make_dir_if_no(site, dir1, dir2)
     print(f"Moving files to {destination}...")
     file_sort = f"mv data/{dir1}/{site}/{dir2}/{item} data/{dir1}/{site}/{destination}/"

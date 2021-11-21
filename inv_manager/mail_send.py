@@ -78,11 +78,14 @@ def init_mail():
         mail_to_send.ehlo()
         mail_to_send.login(SENDER_EMAIL, EMAIL_PASSWORD)
         print(
-            f"\n\033[92m[SUCCESS]\033[0m: \033[96m\033[5m📧 \033[0m\033[0mLogged in as {SENDER_EMAIL} to {SMTP_SERVER} on port {SERVER_PORT}...\n")
+            f"\n\033[92m[SUCCESS]\033[0m: \033[96m\033[5m📧 \033[0m\033[0mLogged in as \
+{SENDER_EMAIL} to {SMTP_SERVER} on port {SERVER_PORT}...\n")
     except Exception as error:
         print(f"\a\n\033[91m[ERROR]: {error}\033[0m\n")
         input(
-            "😞 Connection failed.\n\nMaybe inspecting `Email Account Info` in config file will help?\n\nPress `ENTER` to edit config file or `CTRL+C` to quit...")
+            "😞 Connection failed.\
+                \n\nMaybe inspecting `Email Account Info` in config file will help?\
+                \n\nPress `ENTER` to edit config file or `CTRL+C` to quit...")
         os.system("nano ../config/config.yml")
         sys.exit(1)
     return mail_to_send
@@ -116,7 +119,9 @@ def create_emails(count, sites, mail_to_send):
             white_space = (
                 69-(13+len(str(count))+len(str(len(sites)))+len(site)))*" "
             print(
-                f"\n\033[92m{HASHES}\n# Email #{count}/{len(sites)} ({site.upper()}){white_space}#\n#{DASHES}#\033[00m")
+                f"\n\033[92m{HASHES}\
+                    \n# Email #{count}/{len(sites)} ({site.upper()}){white_space}#\
+                \n#{DASHES}#\033[00m")
             gen_email(site, mail_to_send)
             count += 1
             break
@@ -146,7 +151,9 @@ def gen_email(site, mail_to_send):
     msg.attach(mail_body)
     # preview crafted email data
     print(
-        f'\033[92m\033[1mSEND TO:\n\033[0m{greeting_name} ({receiver_email})\n\033[92m\033[1mSUBJECT:\n\033[0m{mail_subj}\n\033[92m\033[1mBODY:\033[0m')
+        f'\033[92m\033[1mSEND TO:\n\033[0m{greeting_name} ({receiver_email})\
+            \n\033[92m\033[1mSUBJECT:\n\033[0m{mail_subj}\
+            \n\033[92m\033[1mBODY:\033[0m')
     print(mail_body)
     print(f"\n\033[92m#{DASHES}#\n# End of email" +
           55*" "+f"#\n{HASHES}\033[00m")
@@ -178,7 +185,9 @@ def get_file(site, msg=False, email=False):
 
     else:
         print(
-            f"\a\033[93m⚠️  Warning: No files to attach! \n\t('{site}/newest' directory is empty, please generate another feed or put one in manually)\n\033[0m")
+            f"\a\033[93m⚠️  Warning: No files to attach! \
+                \n\t('{site}/newest' directory is empty, please generate another feed \
+or put one in manually)\n\033[0m")
         sys.exit(1)
     return attachment_name, attachment_path, attachment_list, msg
 
@@ -193,7 +202,8 @@ def send_email(msg, receiver_email, greeting_name, attachment, mail_to_send, sit
         mail_to_send.sendmail(SENDER_EMAIL, receiver_email,
                               msg.as_string())  # sendit.exe
         print(
-            f"\n\033[92mEmail successfully sent to {receiver_email} ({greeting_name}) at {time}\033[0m\n")
+            f"\n\033[92mEmail successfully sent to {receiver_email} ({greeting_name}) \
+at {time}\033[0m\n")
         for item in attachment[2]:
             h.sort_files(site, 'sent', 'generated-feeds', item, 'newest')
 

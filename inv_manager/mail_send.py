@@ -11,18 +11,13 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import date, datetime, time
-from helper import cheers, list_dir_ignore_hidden, sites_to_gen, print_sites
+from helper import cheers, list_dir_ignore_hidden, sites_to_gen, validate_sites, sort_files
 from config import cfg
 
 SENDER_EMAIL = (cfg['sender_info']['SENDER_EMAIL'])
 EMAIL_PASSWORD = (cfg['sender_info']['EMAIL_PASSWORD'])
 SMTP_SERVER = (cfg['sender_info']['SMTP_SERVER'])
 SERVER_PORT = (cfg['sender_info']['SERVER_PORT'])
-
-FTP_HOST = (cfg['ftp_info']['FTP_HOST'])
-FTP_USER = (cfg['ftp_info']['FTP_USER'])
-FTP_PASSWORD = (cfg['ftp_info']['FTP_PASSWORD'])
-FTP_UPLOAD_DIR = (cfg['ftp_info']['FTP_UPLOAD_PATH'])
 
 our_company = (cfg['company_name'])
 receiver_info = (cfg['receiver_info'])
@@ -41,17 +36,21 @@ def ftp_connect():
     """Upload inventory files via FTP"""  # TODO make dic to allow for multiple site/ftp configs
     sites = validate_sites()
     for site in sites:
-        ftp_server = FTP(FTP_HOST)
-        ftp_server.login(FTP_USER, FTP_PASSWORD)
-        print(f"\n\033[92m\033[1mLOGGED IN:\033[00m {FTP_USER}@{FTP_HOST}\n")
+        ftp_host = (cfg['ftp_info'][f'{site}']['FTP_HOST'])
+        ftp_user = (cfg['ftp_info'][f'{site}']['FTP_USER'])
+        ftp_password = (cfg['ftp_info'][f'{site}']['FTP_PASSWORD'])
+        ftp_upload_dir = (cfg['ftp_info'][f'{site}']['FTP_UPLOAD_PATH'])
+        ftp_server = FTP(ftp_host)
+        ftp_server.login(ftp_user, ftp_password)
+        print(f"\n\033[92m\033[1mLOGGED IN:\033[00m {ftp_user}@{ftp_host}\n")
         ftp_server.encoding = "utf-8"
         print("\n\033[92m\033[1mWELCOME MSG:\033[00m\n")
         print(ftp_server.getwelcome())
         print("\n\033[92m\033[1mDIRECTORIES:\033[00m\n")
         ftp_server.retrlines('LIST')
         print(f"\n\033[92m\033[1mCWD is:\033[00m {ftp_server.pwd()}\n")
-        print(f"Moving to {FTP_UPLOAD_DIR}...")
-        ftp_server.cwd(f"{FTP_UPLOAD_DIR}")
+        print(f"Moving to {ftp_upload_dir}...")
+        ftp_server.cwd(f"{ftp_upload_dir}")
         print(f"\n\033[92m\033[1mCWD is:\033[00m {ftp_server.pwd()}\n")
         ftp_upload(site, ftp_server)
         ftp_server.quit()
@@ -89,22 +88,6 @@ def init_mail():
     return mail_to_send
 
 
-def validate_sites(dic):
-    """Validate user input"""
-    print("Valid sites:")
-    print_sites(dic)
-    sites = sites_raw = []
-    sites_raw = input(
-        "\nInput sites, seperated by space ('Enter' when done): ").split()
-    for site in sites_raw:  # remove bogus input
-        if site in dic:
-            sites.append(site.lower())
-        else:
-            print(
-                f"\n\033[93m⚠️  Warning! No record of site '{site}'...\033[00m\n\033[91m==> Removing '{site}' from queue...\033[00m")
-    return sites
-
-
 def send_by_site():
     """Send inventory emails to select sites"""
     mail_to_send = init_mail()
@@ -131,8 +114,10 @@ def create_emails(count, sites, mail_to_send):
     """Begin email creation loop"""
     for site in sites:
         while count <= len(sites):
+            white_space = (
+                69-(13+len(str(count))+len(str(len(sites)))+len(site)))*" "
             print(
-                f"\n\033[92m{hash}\n# Email #{count}/{len(sites)} ({site.upper()})"+(69-(13+len(str(count))+len(str(len(sites)))+len(site)))*" "+f"#\n#{dash}#\033[00m")
+                f"\n\033[92m{hash}\n# Email #{count}/{len(sites)} ({site.upper()}){white_space}#\n#{dash}#\033[00m")
             gen_email(site, mail_to_send)
             count += 1
             break
@@ -209,11 +194,8 @@ def send_email(msg, receiver_email, greeting_name, attachment, mail_to_send, sit
                               msg.as_string())  # sendit.exe
         print(
             f"\n\033[92mEmail successfully sent to {receiver_email} ({greeting_name}) at {time}\033[0m\n")
-        if not os.path.exists(f'data/generated-feeds/{site}/sent'):
-            os.makedirs(f'data/generated-feeds/{site}/sent')
         for item in attachment[2]:
-            move_to_sent = f"mv -v 'data/generated-feeds/{site}/newest/{item}' data/generated-feeds/{site}/sent"
-            os.system(move_to_sent)  # move file to sent if attachment exists
+            sort_files(site, 'sent', 'generated-feeds', item, 'newest')
 
 
 def send_all():

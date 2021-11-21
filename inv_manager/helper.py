@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------
-# Some helper bois
+# Some helpers
 # ---------------------------------------------------------------------
 import glob
 import os
@@ -8,6 +8,19 @@ from pathlib import Path
 
 def cheers():
     input("\a\n\033[96m🍻 *clink* Done! Hit 'ENTER' to return to menu: \033[00m")
+
+
+def nothing_to_do():
+    input("\a\n😞 Nothing to do...hit 'Enter' to return to menu: \033[00m")
+
+
+def make_dir_if_no(site, dir1, dir2=False):
+    if dir2:
+        if not os.path.exists(f'data/{dir1}/{site}/{dir2}'):
+            os.makedirs(f'data/{dir1}/{site}/{dir2}')
+    else:
+        if not os.path.exists(f'data/{dir1}/{site}'):
+            os.makedirs(f'data/{dir1}/{site}')
 
 
 def sites_to_gen(sites, dic):
@@ -20,6 +33,22 @@ def sites_to_gen(sites, dic):
         else:
             print(f'\t {site}')
     print("\n")
+
+
+def validate_sites(dic):
+    """Validate that user input exists in dic"""
+    print("Valid sites:")
+    print_sites(dic)
+    sites = sites_raw = []
+    sites_raw = input(
+        "\nInput sites, seperated by space ('Enter' when done): ").split()
+    for site in sites_raw:  # remove bogus input
+        if site in dic:
+            sites.append(site.lower())
+        else:
+            print(
+                f"\n\033[93m⚠️  Warning! No record of site '{site}'...\033[00m\n\033[91m==> Removing '{site}' from queue...\033[00m")
+    return sites
 
 
 def list_dir_ignore_hidden(path):
@@ -38,13 +67,11 @@ def dir_is_full(max_feeds, site):
     newest_folder = Path(f'data/generated-feeds/{site}/newest/')
     is_dir_full = list_dir_ignore_hidden(newest_folder)
     if len(is_dir_full) >= max_feeds:
-        sort_feeds(site)
+        sort_files(site, 'old', 'generated-feeds', '*', 'newest')
 
 
-def sort_feeds(site):
-    """Sorts generated (site) files for cleanliness and easier email automation"""
-    if not os.path.exists(f'data/generated-feeds/{site}/old'):
-        os.makedirs(f'data/generated-feeds/{site}/old')
-    file_sort = f"mv -v data/generated-feeds/{site}/newest/* data/generated-feeds/{site}/old/"
-    print("Moving unused files to 'old':")
+def sort_files(site, destination, dir1, item, dir2=False):
+    make_dir_if_no(site, dir1, dir2)
+    print(f"Moving files to {destination}...")
+    file_sort = f"mv data/{dir1}/{site}/{dir2}/{item} data/{dir1}/{site}/{destination}/"
     os.system(file_sort)

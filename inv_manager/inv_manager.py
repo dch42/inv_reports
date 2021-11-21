@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 
+from ftplib import FTP
 import os
 import sys
 import time
+from pathlib import Path
+import argparse
 from datetime import date, datetime, time
 from dateutil.relativedelta import relativedelta
 import numpy as np
 import pandas as pd
 import pyfiglet
-from helper import cheers, sites_to_gen, print_sites, dir_is_full, sort_feeds
+from helper import validate_sites, cheers, sites_to_gen, make_dir_if_no, dir_is_full, nothing_to_do, sort_files, list_dir_ignore_hidden
 from mail_send import send_all, send_by_site, ftp_connect
 from config import cfg
 
@@ -17,7 +20,7 @@ time = datetime.now().time().strftime('%H-%M-%S')
 
 dash = 70*'-'
 
-PROG_VER = "1.1"
+PROG_VER = "1.0"
 
 main_feed_path = (cfg['path_to_main_feed'])
 feed_cols = (cfg['feed_cols'])
@@ -86,23 +89,13 @@ def import_main_feed():
 
 def gen_by_site():
     """Generate feeds for specific sites"""
-    print("Valid sites:")
-    print_sites(site_dic)
-    sites = sites_raw = []
-    sites_raw = input(
-        "\nInput sites, seperated by space ('Enter' when done): ").split()
-    for site in sites_raw:  # remove bogus input
-        if site in site_dic:
-            sites.append(site)
-        else:
-            print(
-                f"\n\033[93m⚠️  Warning! No record of site '{site}'...\033[00m\n\033[91m==> Removing '{site}' from queue...\033[00m")
+    sites = validate_sites(site_dic)
     if sites:
         print("\n\033[96mGenerating feeds for:\033[00m\n")
         sites_to_gen(sites, site_dic)
         gen_feeds(sites)
     else:
-        input("\a\n😞 Nothing to do...hit 'Enter' to return to menu: \033[00m")
+        nothing_to_do()
 
 
 def gen_feeds(sites):
@@ -116,10 +109,6 @@ def gen_feeds(sites):
                 gen_multi_brand(site)
             else:
                 merge_feed(site, *site_dic[site.lower()])
-        else:
-            print('\aNo feeds to generate...\n\tValid sites:\n')
-            print_sites(site_dic)
-            sys.exit(1)
     cheers()
 
 
@@ -145,6 +134,34 @@ def gen_multi_brand(site):
         merge_feed(site, *site_dic[site.lower()], brand=f"{brand}")
 
 
+def csv_out(site, inv_feed, brand=False):
+    """Output csv files"""
+    if brand:
+        inv_feed.to_csv(
+            fr'data/generated-feeds/{site}/newest/{site}-feed-{brand}-{date}-[{time}].csv', index=False)
+        print(
+            f"\n✨ \033[1mSuccess!\033[0m \033[92mNew \033[1m{site.upper()} - {brand.upper()}\033[0m csv file generated at:\033[00m")
+        print(
+            f'\033[92m\033[96m\033[5m==>\033[0m\033[0m data/generated-feeds/{site}/newest/{site}-feed-{brand}-{date}-[{time}].csv\033[00m\n')
+    else:
+        inv_feed.to_csv(
+            fr'data/generated-feeds/{site}/newest/{site}-feed-{date}-[{time}].csv', index=False)
+        print(
+            f"\n✨ \033[1mSuccess!\033[0m \033[92mNew \033[1m{site.upper()}\033[0m csv file generated at:\033[00m")
+        print(
+            f'\033[92m\033[96m\033[5m==>\033[0m\033[0m data/generated-feeds/{site}/newest/{site}-feed-{date}-[{time}].csv\033[00m\n')
+
+
+def load_template(site, brand=False):
+    if brand:
+        site_df = pd.read_csv(
+            f'data/inventory-templates/{site}-{brand}.csv', sep=",", encoding="Latin-1", index_col=False)
+    else:
+        site_df = pd.read_csv(
+            f'data/inventory-templates/{site}.csv', sep=",", encoding="Latin-1", index_col=False)
+    return site_df
+
+
 def merge_feed(site, join_key, new_qty, brand=False):
     """Creates and outputs csv files with updated inventory quantities from df.
     Negative qtys are replaced with 0.
@@ -152,12 +169,10 @@ def merge_feed(site, join_key, new_qty, brand=False):
     join_key col is reset to default after export is complete.
     """
     main_df.rename(columns={feed_cols[0]: join_key}, inplace=True)
-    if site in multi_brand_dic.keys():
-        site_df = pd.read_csv(
-            f'data/inventory-templates/{site}-{brand}.csv', sep=",", encoding="Latin-1", index_col=False)
+    if brand:
+        site_df = load_template(site, brand)
     else:
-        site_df = pd.read_csv(
-            f'data/inventory-templates/{site}.csv', sep=",", encoding="Latin-1", index_col=False)
+        site_df = load_template(site)
     site_df[join_key] = site_df[join_key].astype(str)
     inv_feed = pd.merge(main_df, site_df, on=f'{join_key}', how='inner')
     # move to qty col & remove qb col
@@ -171,25 +186,13 @@ def merge_feed(site, join_key, new_qty, brand=False):
         inv_feed = inv_feed[titles]
     if site in backorder_site_list:
         inv_feed = get_backorder_date(inv_feed, new_qty, site)
-    if site in multi_brand_dic.keys():
-        if not os.path.exists(f'data/generated-feeds/{site}/newest'):
-            os.makedirs(f'data/generated-feeds/{site}/newest')
-        inv_feed.to_csv(
-            fr'data/generated-feeds/{site}/newest/{site}-feed-{brand}-{date}-[{time}].csv', index=False)
-        print(
-            f"\n✨ \033[1mSuccess!\033[0m \033[92mNew \033[1m{site.upper()} - {brand.upper()}\033[0m csv file generated at:\033[00m")
-        print(
-            f'\033[92m\033[96m\033[5m==>\033[0m\033[0m data/generated-feeds/{site}/newest/{site}-feed-{brand}-{date}-[{time}].csv\033[00m\n')
+    if brand:
+        make_dir_if_no(site, 'generated-feeds', 'newest')
+        csv_out(site, inv_feed, brand)
     else:
-        sort_feeds(site)
-        if not os.path.exists(f'data/generated-feeds/{site}/newest'):
-            os.makedirs(f'data/generated-feeds/{site}/newest')
-        inv_feed.to_csv(
-            fr'data/generated-feeds/{site}/newest/{site}-feed-{date}-[{time}].csv', index=False)
-        print(
-            f"\n✨ \033[1mSuccess!\033[0m \033[92mNew \033[1m{site.upper()}\033[0m csv file generated at:\033[00m")
-        print(
-            f'\033[92m\033[96m\033[5m==>\033[0m\033[0m data/generated-feeds/{site}/newest/{site}-feed-{date}-[{time}].csv\033[00m\n')
+        sort_files(site, 'old', 'generated-feeds', '*', 'newest')
+        make_dir_if_no(site, 'generated-feeds', 'newest')
+        csv_out(site, inv_feed)
     main_df.rename(columns={join_key: feed_cols[0]}, inplace=True)
 
 
@@ -254,6 +257,17 @@ gen_menu = {
 # ---------------------------------------------------------------------
 
 if __name__ == '__main__':
+    templates = os.listdir('data/inventory-templates/')
+    templates_no_hidden = list_dir_ignore_hidden('data/inventory-templates')
+    if len(templates_no_hidden):
+        for item in templates:
+            multi_brand = item.split('-')
+            if not item.startswith('.') and item.endswith('.csv') and item.lower()[:-4] not in site_dic and multi_brand[0].lower() not in site_dic:
+                input(
+                    f"\a\033[93m⚠️  WARNING: {item} doesn't match any sites in config.yml.\nPress `CTRL+C` to quit, `ENTER` to continue anyway...\033[0m")
+    else:
+        input(f"\a\033[93m⚠️  WARNING: `data/inventory-templates` is empty. No feeds can be generated.\nPress `CTRL+C` to quit, `ENTER` to continue anyway...\033[0m")
+
     if main_feed_path.lower().endswith('.csv') is True and os.path.isfile(main_feed_path) is True:
         main_df = import_main_feed()
         menu_loop(main_menu)

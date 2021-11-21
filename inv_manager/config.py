@@ -1,3 +1,5 @@
+"""Import config file"""
+
 import yaml
 
 with open('../config/config.yml', 'r') as stream:

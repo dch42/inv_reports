@@ -1,6 +1,4 @@
-# ---------------------------------------------------------------------
-# Some helpers
-# ---------------------------------------------------------------------
+"""Some extra functions"""
 import glob
 import os
 from pathlib import Path
@@ -50,7 +48,8 @@ def validate_sites(dic):
             sites.append(site.lower())
         else:
             print(
-                f"\n\033[93m⚠️  Warning! No record of site '{site}'...\033[00m\n\033[91m==> Removing '{site}' from queue...\033[00m")
+                f"\n\033[93m⚠️  Warning! No record of site '{site}'...\033[00m\
+                    \n\033[91m==> Removing '{site}' from queue...\033[00m")
     return sites
 
 

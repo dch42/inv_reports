@@ -106,7 +106,7 @@ def send_by_site():
         mail_to_send.quit()
         h.cheers()
     else:
-        input("\a\n😞 Nothing to do...hit 'Enter' to return to menu: \033[00m")
+        h.nothing_to_do()
 
 
 def create_emails(count, sites, mail_to_send):

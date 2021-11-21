@@ -7,14 +7,17 @@ from pathlib import Path
 
 
 def cheers():
+    """Clink"""
     input("\a\n\033[96m🍻 *clink* Done! Hit 'ENTER' to return to menu: \033[00m")
 
 
 def nothing_to_do():
+    """Nothing to do"""
     input("\a\n😞 Nothing to do...hit 'Enter' to return to menu: \033[00m")
 
 
 def make_dir_if_no(site, dir1, dir2=False):
+    """Make dir if not exists"""
     if dir2:
         if not os.path.exists(f'data/{dir1}/{site}/{dir2}'):
             os.makedirs(f'data/{dir1}/{site}/{dir2}')
@@ -43,7 +46,7 @@ def validate_sites(dic):
     sites_raw = input(
         "\nInput sites, seperated by space ('Enter' when done): ").split()
     for site in sites_raw:  # remove bogus input
-        if site in dic:
+        if site.lower() in dic:
             sites.append(site.lower())
         else:
             print(
@@ -71,6 +74,7 @@ def dir_is_full(max_feeds, site):
 
 
 def sort_files(site, destination, dir1, item, dir2):
+    """Move file(s) from one dir to another"""
     make_dir_if_no(site, dir1, dir2)
     print(f"Moving files to {destination}...")
     file_sort = f"mv data/{dir1}/{site}/{dir2}/{item} data/{dir1}/{site}/{destination}/"

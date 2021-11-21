@@ -11,7 +11,7 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import date, datetime, time
-from helper import cheers, list_dir_ignore_hidden, sites_to_gen, validate_sites, sort_files
+import helper as h
 from config import cfg
 
 SENDER_EMAIL = (cfg['sender_info']['SENDER_EMAIL'])
@@ -28,13 +28,13 @@ body_closer = (cfg['body_closer'])
 date = datetime.now().date()
 time = datetime.now().time().strftime('%H:%M:%S')
 
-dash = 68*'-'
-hash = 70*'#'
+DASHES = 68*'-'
+HASHES = 70*'#'
 
 
 def ftp_connect():
-    """Upload inventory files via FTP"""  # TODO make dic to allow for multiple site/ftp configs
-    sites = validate_sites()
+    """Upload inventory files via FTP"""
+    sites = h.validate_sites((cfg['ftp_info']))
     for site in sites:
         ftp_host = (cfg['ftp_info'][f'{site}']['FTP_HOST'])
         ftp_user = (cfg['ftp_info'][f'{site}']['FTP_USER'])
@@ -54,7 +54,7 @@ def ftp_connect():
         print(f"\n\033[92m\033[1mCWD is:\033[00m {ftp_server.pwd()}\n")
         ftp_upload(site, ftp_server)
         ftp_server.quit()
-        cheers()
+        h.cheers()
 
 
 def ftp_upload(site, server):
@@ -91,21 +91,20 @@ def init_mail():
 def send_by_site():
     """Send inventory emails to select sites"""
     mail_to_send = init_mail()
-    sites = validate_sites(receiver_info)
+    sites = h.validate_sites(receiver_info)
     if sites:
         print("\n\033[96mGenerating emails for:\033[00m\n")
-        sites_to_gen(sites, receiver_info)
-        for site in sites:
-            if len(sites) > 1:
-                print(f"{len(sites)} emails will be generated...")
-                print("\033[92mGenerating your emails...\033[00m")
-            else:
-                print("1 email will be generated...")
-                print("\033[92mGenerating your email...\033[00m\n")
+        h.sites_to_gen(sites, receiver_info)
+        if len(sites) > 1:
+            print(f"{len(sites)} emails will be generated...")
+            print("\033[92mGenerating your emails...\033[00m")
+        else:
+            print("1 email will be generated...")
+            print("\033[92mGenerating your email...\033[00m\n")
         count = 1
         create_emails(count, sites, mail_to_send)
         mail_to_send.quit()
-        cheers()
+        h.cheers()
     else:
         input("\a\n😞 Nothing to do...hit 'Enter' to return to menu: \033[00m")
 
@@ -117,7 +116,7 @@ def create_emails(count, sites, mail_to_send):
             white_space = (
                 69-(13+len(str(count))+len(str(len(sites)))+len(site)))*" "
             print(
-                f"\n\033[92m{hash}\n# Email #{count}/{len(sites)} ({site.upper()}){white_space}#\n#{dash}#\033[00m")
+                f"\n\033[92m{HASHES}\n# Email #{count}/{len(sites)} ({site.upper()}){white_space}#\n#{DASHES}#\033[00m")
             gen_email(site, mail_to_send)
             count += 1
             break
@@ -149,17 +148,18 @@ def gen_email(site, mail_to_send):
     print(
         f'\033[92m\033[1mSEND TO:\n\033[0m{greeting_name} ({receiver_email})\n\033[92m\033[1mSUBJECT:\n\033[0m{mail_subj}\n\033[92m\033[1mBODY:\033[0m')
     print(mail_body)
-    print(f"\n\033[92m#{dash}#\n# End of email"+55*" "+f"#\n{hash}\033[00m")
+    print(f"\n\033[92m#{DASHES}#\n# End of email" +
+          55*" "+f"#\n{HASHES}\033[00m")
     send_email(msg, receiver_email, greeting_name,
                attachment, mail_to_send, site)
 
 
-def get_file(site, msg, email=False):
+def get_file(site, msg=False, email=False):
     """finds info for newest file to attach for site"""
     attachment_list = []  # for multiple files
     newest_folder = Path(f'data/generated-feeds/{site}/newest/')
     newest_feeds = newest_folder.iterdir()
-    is_empty_dir = list_dir_ignore_hidden(newest_folder)
+    is_empty_dir = h.list_dir_ignore_hidden(newest_folder)
     if len(is_empty_dir):
         for item in newest_feeds:
             if item.is_file():
@@ -195,7 +195,7 @@ def send_email(msg, receiver_email, greeting_name, attachment, mail_to_send, sit
         print(
             f"\n\033[92mEmail successfully sent to {receiver_email} ({greeting_name}) at {time}\033[0m\n")
         for item in attachment[2]:
-            sort_files(site, 'sent', 'generated-feeds', item, 'newest')
+            h.sort_files(site, 'sent', 'generated-feeds', item, 'newest')
 
 
 def send_all():

@@ -267,7 +267,7 @@ gen_menu = {
 
 if __name__ == '__main__':
     os.system('clear')
-    print("Starting Inventory Manager...\nVerifying templates...\n")
+    print("Starting Inventory Manager...\nVerifying template existence...\n")
     templates = os.listdir('data/inventory-templates/')
     templates_no_hidden = h.list_dir_ignore_hidden('data/inventory-templates')
     if len(templates_no_hidden):
@@ -279,7 +279,7 @@ if __name__ == '__main__':
                 print(
                     f"\033[93m⚠️  WARNING: `{item}` doesn't match any sites in config.yml.\033[0m")
             elif not item.startswith('.') and item.endswith('.csv'):
-                print(f'✅  Template for `{item}` OK')
+                print(f'✅  Template for `{item}` exists')
                 if multi_brand[0].endswith('.csv'):
                     ok_list.append(item.lower()[:-4])
                 else:

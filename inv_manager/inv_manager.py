@@ -35,7 +35,7 @@ multi_brand_dic = (cfg['multi_brand_dic'])
 
 
 def menu_loop(menu):
-    """Persistant modular menu boi"""
+    """Persistant modular menu"""
     choice = None
     while choice != 'q':
         os.system("clear")
@@ -266,19 +266,32 @@ gen_menu = {
 # ---------------------------------------------------------------------
 
 if __name__ == '__main__':
+    os.system('clear')
+    print("Starting Inventory Manager...\nVerifying templates...\n")
     templates = os.listdir('data/inventory-templates/')
     templates_no_hidden = h.list_dir_ignore_hidden('data/inventory-templates')
     if len(templates_no_hidden):
+        ok_list = []
         for item in templates:
             multi_brand = item.split('-')
             if not item.startswith('.') and item.endswith('.csv') and item.lower()[:-4] \
                     not in site_dic and multi_brand[0].lower() not in site_dic:
-                input(
-                    f"\a\033[93m⚠️  WARNING: {item} doesn't match any sites in config.yml.\
-                        \nPress `CTRL+C` to quit, `ENTER` to continue anyway...\033[0m")
+                print(
+                    f"\033[93m⚠️  WARNING: `{item}` doesn't match any sites in config.yml.\033[0m")
+            elif not item.startswith('.') and item.endswith('.csv'):
+                print(f'✅  Template for `{item}` OK')
+                if multi_brand[0].endswith('.csv'):
+                    ok_list.append(item.lower()[:-4])
+                else:
+                    ok_list.append(multi_brand[0].lower())
+        for site in site_dic:
+            if site not in ok_list:
+                print(
+                    f"\033[93m⚠️  WARNING: Site `{site}` doesn't seem to have a template.\033[0m")
+        input("\nHit `ENTER` to continue to menu, CTRL+C to quit...")
     else:
-        input("\a\033[93m⚠️  WARNING: `data/inventory-templates` is empty. No feeds can be generated.\
-            \nPress `CTRL+C` to quit, `ENTER` to continue anyway...\033[0m")
+        input("\a\n\033[93m⚠️  WARNING: `data/inventory-templates` is empty. No feeds can be generated.\
+            \nPress `CTRL+C` to quit, `ENTER` to continue anyway...\033[0m\n")
 
     if main_feed_path.lower().endswith('.csv') is True and os.path.isfile(main_feed_path) is True:
         main_df = import_main_feed()

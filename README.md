@@ -172,9 +172,9 @@ generated-feeds/
 Backorder settings can be tailored in `config.yml`.
 
 For sites that require backorder dates in their feeds: 
-- The program will populate the field with a date `?` months out from feed creation if the out of stock item is not marked discontinued.
+- The program will populate the field with a date `x` months out from feed creation if the out of stock item is not marked discontinued.
 - The program will update the inventory template accordingly, moving the old template to `data/inventory-templates/old`.
-- Once backorder dates are set, they will not be overwritten unless the item is still out of stock `?` days before generation. 
+- Once backorder dates are set, they will not be overwritten unless the item is still out of stock `y` days before generation. 
 
 Marking items as discontinued should be done manually to the inventory template csv file beforehand.
 

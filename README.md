@@ -1,4 +1,4 @@
-# inv-manager
+# inv-reports
 Automates the creation and sending of inventory feed csv files for dropship portals, updating available quantity levels from a central inventory report. 
 
 Tested using inventory report from QuickBooks Desktop.
@@ -9,7 +9,7 @@ Tested using inventory report from QuickBooks Desktop.
 
 Clone the repo and change to directory:
 ~~~
-git clone https://github.com/dch42/inv-manager.git && cd inv-manager
+git clone https://github.com/dch42/inv-reports.git && cd inv-reports
 ~~~
 
 Running `make` will install dependencies and add executable permissions to relevant scripts.

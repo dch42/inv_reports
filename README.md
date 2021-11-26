@@ -7,7 +7,7 @@ Tested using inventory report from QuickBooks Desktop.
 
 ### Installation
 
-If you have git, clone the repo and change to directory:
+Clone the repo and change to directory:
 ~~~
 git clone https://github.com/dch42/inv-manager.git && cd inv-manager
 ~~~
@@ -129,7 +129,7 @@ Moving unused files to 'old':
 data/generated-feeds/site1/newest/site1-feed-2021-11-14-[23-09-15].csv -> data/generated-feeds/site1/old/site1-feed-2021-11-14-[23-09-15].csv
 
 ✨ Success! New SITE1 csv file generated at:
-==> data/generated-feeds/site/newest/site-feed-2021-11-14-[23-36-44].csv
+==> data/generated-feeds/site1/newest/site1-feed-2021-11-14-[23-36-44].csv
 
 Moving unused files to 'old':
 data/generated-feeds/site2/newest/site2-feed-2021-11-14-[23-09-15].csv -> data/generated-feeds/site2/old/site2-feed-2021-11-14-[23-09-15].csv
